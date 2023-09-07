@@ -59,7 +59,7 @@ func (f *Filter) Filter(link common.NewLinks) {
 			continue
 		}
 
-		if countUrlSegments(newUrl)-countUrlSegments(baseUrl) > f.maxDepth {
+		if absDiff(countUrlSegments(newUrl), countUrlSegments(baseUrl)) > f.maxDepth {
 			f.pendingCountChan <- -1
 			continue
 		}
@@ -84,5 +84,18 @@ func (f *Filter) Filter(link common.NewLinks) {
 }
 
 func countUrlSegments(u *url.URL) int {
-	return len(strings.Split(u.Path, "/"))
+	path := u.Path
+	if path == "/" {
+		return 0
+	}
+	path = strings.TrimPrefix(path, "/")
+	path = strings.TrimSuffix(path, "/")
+	return len(strings.Split(path, "/"))
+}
+
+func absDiff(x, y int) int {
+	if x < y {
+		return y - x
+	}
+	return x - y
 }
